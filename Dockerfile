@@ -1,9 +1,13 @@
 # ========= BUILD =========
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src src
 
-COPY . .
+COPY mvnw .
+COPY .mvn .mvn
 
+RUN chmod +x ./mvnw
 RUN ./mvnw clean package -DskipTests
 
 # ========= RUN =========
