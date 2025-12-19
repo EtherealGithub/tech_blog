@@ -2,13 +2,13 @@ spring:
   application:
     name: Blog de Tecnologia
   datasource:
-    url: jdbc:mysql://localhost:3306/tech_blog_db
-    username: ${username}
-    password: ${password}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${db_url}
+    username: ${db_username}
+    password: ${db_password}
+    driver-class-name: ${db_driver}
   jpa:
     show-sql: false
     hibernate:
       ddl-auto: update
 server:
-  port: 8080
+  port: ${app_port}
