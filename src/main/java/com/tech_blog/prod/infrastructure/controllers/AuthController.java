@@ -3,29 +3,89 @@ package com.tech_blog.prod.infrastructure.controllers;
 import com.tech_blog.prod.application.dto.requests.auth.LoginRequest;
 import com.tech_blog.prod.application.dto.responses.auth.LoginResponse;
 import com.tech_blog.prod.application.usecases.ports.IAuthUsePort;
+import com.tech_blog.prod.infrastructure.security.user.AuthUserDetails;
+import com.tech_blog.prod.infrastructure.security.util.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     // Inyeccion de dependencias
-    private final IAuthUsePort iAuthUsePort;
+    private final JwtService jwtService;
+    private final AuthenticationManager iAuthenticationManager;
 
     // Constructor
-    public AuthController(IAuthUsePort iAuthUsePort) {
-        this.iAuthUsePort = iAuthUsePort;
+    public AuthController(JwtService jwtService, AuthenticationManager iAuthenticationManager) {
+        this.jwtService = jwtService;
+        this.iAuthenticationManager = iAuthenticationManager;
     }
 
     // Endpoints
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(iAuthUsePort.login(loginRequest));
+        Authentication auth = iAuthenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
+        );
+
+        AuthUserDetails principal = Optional.ofNullable((AuthUserDetails) auth.getPrincipal())
+                .orElseThrow(() -> new IllegalStateException("Authentication principal is null"));
+
+        String username = principal.getUsername();
+
+        List<String> roles = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        long longCurrentTime = System.currentTimeMillis();
+
+        String accessToken = jwtService.generateToken(username, roles, longCurrentTime);
+        String refreshToken = jwtService.generateRefreshToken(username, longCurrentTime);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse("Bearer", accessToken, refreshToken));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
+        String refreshToken = refreshRequest.getRefreshToken();
+
+        try {
+            Claims claims = jwtDecoder.parseToken(refreshToken);
+
+            // Validar que sea un refresh token
+            if (!"refresh".equals(claims.get("type"))) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            String username = claims.getSubject();
+            long now = System.currentTimeMillis();
+
+            // Opcional: si incluiste roles en el refresh token
+            List<String> roles = claims.get("roles", List.class);
+
+            String newAccessToken = jwtService.generateToken(username, roles, now);
+            String newRefreshToken = jwtService.generateRefreshToken(username, now); // rotación opcional
+
+            return ResponseEntity.ok(new LoginResponse("Bearer", newAccessToken, newRefreshToken));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
 
 
 }

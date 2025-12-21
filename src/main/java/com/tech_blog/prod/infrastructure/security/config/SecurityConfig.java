@@ -1,6 +1,6 @@
 package com.tech_blog.prod.infrastructure.security.config;
 
-import com.tech_blog.prod.infrastructure.security.jwt.adapter.JwtAuthFilterAdapter;
+import com.tech_blog.prod.infrastructure.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,10 +18,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     // Inyeccion de dependencias
-    private final JwtAuthFilterAdapter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
     // Constructor
-    public SecurityConfig(JwtAuthFilterAdapter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 

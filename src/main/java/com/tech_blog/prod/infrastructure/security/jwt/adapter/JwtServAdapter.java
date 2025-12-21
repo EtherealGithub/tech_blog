@@ -1,6 +1,7 @@
 package com.tech_blog.prod.infrastructure.security.jwt.adapter;
 
 import com.tech_blog.prod.infrastructure.security.jwt.port.IJwtServPort;
+import com.tech_blog.prod.infrastructure.security.util.JwtConfig;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +18,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class JwtServAdapter implements IJwtServPort {
+
+    private final JwtConfig jwtProperties;
+    private final JwtParser jwtParser;
+
+    public JwtServAdapter(JwtConfig jwtProperties) {
+        this.jwtProperties = jwtProperties;
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)))
+                .build();
+    }
 
     // Configuration
     private final String secret = "1f3c7218ea76d594351145add5dfc462030bc0431edf94a278b8f70a671bf7c6";

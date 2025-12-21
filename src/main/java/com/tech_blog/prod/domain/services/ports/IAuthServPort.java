@@ -4,5 +4,5 @@ import com.tech_blog.prod.application.dto.requests.auth.LoginRequest;
 import com.tech_blog.prod.application.dto.responses.auth.LoginResponse;
 
 public interface IAuthServPort {
-    LoginResponse login(LoginRequest loginRequest);
+    String getCurrentUserId();
 }
