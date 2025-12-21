@@ -3,6 +3,7 @@ package com.tech_blog.prod.domain.services.adapters;
 import com.tech_blog.prod.application.constants.Role;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
+import com.tech_blog.prod.application.dto.requests.users.UpdateUserRoleRequest;
 import com.tech_blog.prod.application.dto.responses.users.UserResponse;
 import com.tech_blog.prod.domain.services.ports.IAuthServPort;
 import com.tech_blog.prod.domain.services.ports.IUserServPort;
@@ -48,15 +49,14 @@ public class UserServAdapter implements IUserServPort {
     }
 
     @Override
-    public List<UserResponse> listUsers(Authentication authentication) {
+    public List<UserResponse> listUsers() {
 
         Role role = iAuthServPort.getCurrentUserStrongestRole();
-        UserEntity me = iAuthServPort.getCurrentUserEntity();
 
         List<UserEntity> users = switch (role) {
             case SUPERADMIN -> iUserRepository.findAll();
             case ADMIN      -> iUserRepository.findByIsUserAndIsAdminAndIsSuperadmin(true, false, false);
-            case USER       -> List.of(me);
+            default         -> List.of();
         };
 
         return users.stream()
@@ -66,163 +66,133 @@ public class UserServAdapter implements IUserServPort {
 
     @Override
     public UserResponse getUserById(Long id) {
+        return auxiliaryUserEntityToResponse(resolveTargetUser(id));
+    }
+
+    @Override
+    public UserResponse createUser(CreateUserRequest createUserRequest) {
 
         Role role = iAuthServPort.getCurrentUserStrongestRole();
 
-        try {
-            UserEntity user = switch (role) {
-
-                case SUPERADMIN ->
-                    iUserRepository.findById(id).orElseThrow();
-
-                case ADMIN ->
-                    iUserRepository
-                        .findByIdAndIsUserAndIsAdminAndIsSuperadmin(id, true, false, false)
-                        .orElseThrow();
-
-                case USER ->
-                    throw new ResponseStatusException(
-                        HttpStatus.FORBIDDEN, "Forbidden"
-                    );
-            };
-
-            return auxiliaryUserEntityToResponse(user);
-
-        } catch (NoSuchElementException ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN, "Forbidden"
-            );
+        if (role == Role.ADMIN && createUserRequest.role() != CreateUserRequest.UserRole.USER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ADMIN can only create USER");
         }
-    }
-
-    @Override
-    public UserResponse createUser(CreateUserRequest createUserRequest, Authentication authentication) {
-
-        UserEntity actored = actor(authentication);
-
-        if (!isAdmin(actored)) {
-            throw new IllegalArgumentException("Access denied: only ADMIN+ can create users");
-        }
-
-        if (isAdmin(actored) && !isSuper(actored) && createUserRequest.role() != CreateUserRequest.UserRole.USER) {
-            throw new IllegalArgumentException("ADMIN can only create USER");
-        }
-
-        //if (createUserRequest.role() == CreateUserRequest.UserRole.SUPERADMIN) {
-        //    throw new IllegalArgumentException("Creating SUPERADMIN via API is not allowed");
-        //}
 
         String username = createUserRequest.username().trim();
-        String email = createUserRequest.email().trim();
+        String email    = createUserRequest.email().trim();
 
         if (iUserRepository.existsByUsernameIgnoreCase(username)) {
-            throw new IllegalArgumentException("Username already exists: " + username);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
         if (iUserRepository.existsByEmailIgnoreCase(email)) {
-            throw new IllegalArgumentException("Email already exists: " + email);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(username);
-        userEntity.setEmail(email);
-        userEntity.setPasswordHash(encoder.encode(createUserRequest.password()));
-        applyRoleFlags(userEntity, createUserRequest.role());
-        userEntity.setCreatedAt(LocalDateTime.now());
-        userEntity.setUpdatedAt(null);
+        UserEntity user = new UserEntity();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(encoder.encode(createUserRequest.password()));
 
-        userEntity = iUserRepository.save(userEntity);
-        return auxiliaryUserEntityToResponse(userEntity);
-    }
+        user.setIsUser(false);
+        user.setIsAdmin(false);
+        user.setIsSuperadmin(false);
 
-    @Override
-    public UserResponse updateUser(Long id, UpdateUserRequest updateUserRequest, Authentication authentication) {
-        UserEntity actored = actor(authentication);
-        if (!isAdmin(actored)) throw new IllegalArgumentException("Access denied: only ADMIN+");
-
-        UserEntity userEntity = getUserEntityById(id);
-        assertCanManageTarget(actored, userEntity);
-
-        String newUsername = updateUserRequest.username().trim();
-        String newEmail = updateUserRequest.email().trim();
-
-        iUserRepository.findByUsernameIgnoreCase(newUsername)
-                .filter(other -> !other.getId().equals(id))
-                .ifPresent(x -> { throw new IllegalArgumentException("Username already exists: " + newUsername); });
-
-        iUserRepository.findByEmailIgnoreCase(newEmail)
-                .filter(other -> !other.getId().equals(id))
-                .ifPresent(x -> { throw new IllegalArgumentException("Email already exists: " + newEmail); });
-
-        userEntity.setUsername(newUsername);
-        userEntity.setEmail(newEmail);
-        userEntity.setUpdatedAt(LocalDateTime.now());
-
-        userEntity = iUserRepository.save(userEntity);
-        return auxiliaryUserEntityToResponse(userEntity);
-    }
-
-    @Override
-    public void changePasswordById(Long id, String newPassword, Authentication authentication) {
-        UserEntity actored = actor(authentication);
-        if (!isAdmin(actored)) throw new IllegalArgumentException("Access denied: only ADMIN+");
-
-        UserEntity target = getUserEntityById(id);
-        assertCanManageTarget(actored, target);
-
-        target.setPasswordHash(encoder.encode(newPassword));
-        target.setUpdatedAt(LocalDateTime.now());
-        iUserRepository.save(target);
-    }
-
-    @Override
-    public void deleteUserById(Long id, Authentication authentication) {
-        UserEntity actored = actor(authentication);
-        if (!isAdmin(actored)) throw new IllegalArgumentException("Access denied: only ADMIN+");
-
-        UserEntity target = getUserEntityById(id);
-        assertCanManageTarget(actored, target);
-
-        if (actored.getId().equals(target.getId())) {
-            throw new IllegalArgumentException("You cannot delete yourself");
+        switch (createUserRequest.role()) {
+            case USER       -> user.setIsUser(true);
+            case ADMIN      -> user.setIsAdmin(true);
+            case SUPERADMIN -> user.setIsSuperadmin(true);
         }
 
-        iUserRepository.delete(target);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(null);
+
+        user = iUserRepository.save(user);
+
+        return auxiliaryUserEntityToResponse(user);
+    }
+
+    @Override
+    public UserResponse updateUser(Long id, UpdateUserRequest updateUserRequest) {
+
+        UserEntity user = resolveTargetUser(id);
+
+        user.setUsername(updateUserRequest.username());
+        user.setEmail(updateUserRequest.email());
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return auxiliaryUserEntityToResponse(iUserRepository.save(user));
+    }
+
+    @Override
+    public void changePasswordById(Long id, String newPassword) {
+        UserEntity user = resolveTargetUser(id);
+
+        user.setPasswordHash(encoder.encode(newPassword));
+        user.setUpdatedAt(LocalDateTime.now());
+
+        iUserRepository.save(user);
+    }
+
+    @Override
+    public UserResponse updateUserRoleById(Long id, UpdateUserRoleRequest updateUserRoleRequest) {
+
+        Role actorRole = iAuthServPort.getCurrentUserStrongestRole();
+        UserEntity user = resolveTargetUser(id);
+
+        if (actorRole == Role.ADMIN && updateUserRoleRequest.role() != Role.USER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "ADMIN can only assign USER role");
+        }
+
+        user.setIsUser(false);
+        user.setIsAdmin(false);
+        user.setIsSuperadmin(false);
+
+        switch (updateUserRoleRequest.role()) {
+            case USER       -> user.setIsUser(true);
+            case ADMIN      -> user.setIsAdmin(true);
+            case SUPERADMIN -> user.setIsSuperadmin(true);
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+
+        return auxiliaryUserEntityToResponse(iUserRepository.save(user));
+    }
+
+    @Override
+    public void deleteUserById(Long id) {
+        UserEntity user = resolveTargetUser(id);
+        iUserRepository.delete(user);
     }
 
 
 
     // Helpers
-    private boolean isSuper(UserEntity a) {
-        return Boolean.TRUE.equals(a.getIsSuperadmin());
+    private UserEntity resolveTargetUser(Long id) {
+
+        Role role = iAuthServPort.getCurrentUserStrongestRole();
+
+        return switch (role) {
+
+            case SUPERADMIN ->
+                    iUserRepository.findById(id)
+                            .orElseThrow(() -> new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND, "User not found"
+                            ));
+
+            case ADMIN ->
+                    iUserRepository
+                            .findByIdAndIsUserAndIsAdminAndIsSuperadmin(id, true, false, false)
+                            .orElseThrow(() -> new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND, "User not found"
+                            ));
+
+            case USER ->
+                    throw new ResponseStatusException(
+                            HttpStatus.FORBIDDEN, "Forbidden"
+                    );
+        };
     }
 
-    private boolean isAdmin(UserEntity a) {
-        return Boolean.TRUE.equals(a.getIsAdmin()) || Boolean.TRUE.equals(a.getIsSuperadmin());
-    }
-
-    private boolean targetIsAdminOrSuper(UserEntity target) {
-        return Boolean.TRUE.equals(target.getIsAdmin()) || Boolean.TRUE.equals(target.getIsSuperadmin());
-    }
-
-    private void assertCanManageTarget(UserEntity actor, UserEntity target) {
-        if (isSuper(actor)) return;
-
-        if (!isAdmin(actor)) {
-            throw new IllegalArgumentException("Access denied: only ADMIN+ can manage users");
-        }
-
-        if (targetIsAdminOrSuper(target)) {
-            throw new IllegalArgumentException("Access denied: ADMIN cannot manage ADMIN/SUPERADMIN");
-        }
-    }
-
-    private void applyRoleFlags(UserEntity u, CreateUserRequest.UserRole role) {
-        switch (role) {
-            case SUPERADMIN -> { u.setIsSuperadmin(true); u.setIsAdmin(true); u.setIsUser(true); }
-            case ADMIN      -> { u.setIsSuperadmin(false); u.setIsAdmin(true); u.setIsUser(true); }
-            default         -> { u.setIsSuperadmin(false); u.setIsAdmin(false); u.setIsUser(true); }
-        }
-    }
 
     private UserResponse auxiliaryUserEntityToResponse(UserEntity userEntity) {
         return new UserResponse(

@@ -11,9 +11,16 @@ spring:
     hibernate:
       ddl-auto: update
 
-jwt:
-  secret: "MWYzYzcyMThlYTc2ZDU5NDM1MTE0NWFkZDVkZmM0NjIwMzBiYzA0MzFlZGY5NGEyNzhiOGY3MGE2NzFiZjdjNg==" #1f3c7218ea76d594351145add5dfc462030bc0431edf94a278b8f70a671bf7c6
-  expiration: 900000 # 15 minutos (1000 * 60 * 15)
+
+app:
+  bootstrapping:
+    superadmin:
+      username: ${BOOTSTRAP_SUPERADMIN_USERNAME:superadmin}
+      email: ${BOOTSTRAP_SUPERADMIN_EMAIL:superadmin@local.test}
+      password: ${BOOTSTRAP_SUPERADMIN_PASSWORD:superadmin}
+  jwt:
+    secret: "MWYzYzcyMThlYTc2ZDU5NDM1MTE0NWFkZDVkZmM0NjIwMzBiYzA0MzFlZGY5NGEyNzhiOGY3MGE2NzFiZjdjNg==" #1f3c7218ea76d594351145add5dfc462030bc0431edf94a278b8f70a671bf7c6
+    expiration: 900000 # 15 minutos (1000 * 60 * 15)
 
 server:
   port: ${PORT:8080}

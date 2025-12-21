@@ -14,10 +14,10 @@ import java.util.Base64;
 public class JwtConfig {
 
     // Attributes
-    @Value("${jwt.secret}")
+    @Value("${app.jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${app.jwt.expiration}")
     private long expirationMs;
 
     // Getters
