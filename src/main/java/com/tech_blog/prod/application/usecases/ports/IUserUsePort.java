@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import java.util.List;
 
 public interface IUserUsePort {
-    UserResponse getCurrentUser(Authentication authentication);
+    UserResponse getCurrentUser();
     List<UserResponse> listUsers(Authentication authentication);
     UserResponse getUserById(Long id, Authentication authentication);
     UserResponse createUser(CreateUserRequest createUserRequest, Authentication authentication);

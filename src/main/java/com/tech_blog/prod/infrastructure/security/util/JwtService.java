@@ -36,25 +36,6 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(String username, long longCurrentTime) {
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date(longCurrentTime))
-                .expiration(new Date(longCurrentTime + jwtConfig.getRefreshExpirationMs()))
-                .claim("type", "refresh")
-                .signWith(jwtConfig.getSignInKey())
-                .compact();
-    }
-
-
-    public boolean isRefreshTokenValid(String token) {
-        try {
-            return !jwtDecoder.isTokenExpired(token);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public boolean isTokenValid(String token) {
         try {
             return !jwtDecoder.isTokenExpired(token);

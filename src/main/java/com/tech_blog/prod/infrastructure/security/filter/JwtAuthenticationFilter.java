@@ -1,7 +1,7 @@
 package com.tech_blog.prod.infrastructure.security.filter;
 
-import com.tech_blog.prod.infrastructure.security.jwt.port.IJwtServPort;
 import com.tech_blog.prod.infrastructure.security.user.CustomUserDetailsService;
+import com.tech_blog.prod.infrastructure.security.util.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -22,11 +22,11 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final IJwtServPort iJwtServPort;
+    private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(IJwtServPort iJwtServPort, CustomUserDetailsService userDetailsService) {
-        this.iJwtServPort = iJwtServPort;
+    public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
+        this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
     }
 
@@ -40,10 +40,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 final String token = authHeader.substring(7);
 
-                if (iJwtServPort.isTokenValid(token)
+                if (jwtService.isTokenValid(token)
                         && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                    final String username = iJwtServPort.usernameFromToken(token);
+                    final String username = jwtService.usernameFromToken(token);
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                     UsernamePasswordAuthenticationToken auth =

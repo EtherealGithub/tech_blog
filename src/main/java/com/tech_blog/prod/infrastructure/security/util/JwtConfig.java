@@ -20,9 +20,6 @@ public class JwtConfig {
     @Value("${jwt.expiration}")
     private long expirationMs;
 
-    @Value("${jwt.refresh_expiration}")
-    private long refreshExpirationMs;
-
     // Getters
     public String getSecret() {
         return secret;
@@ -30,10 +27,6 @@ public class JwtConfig {
 
     public long getExpirationMs() {
         return expirationMs;
-    }
-
-    public long getRefreshExpirationMs() {
-        return refreshExpirationMs;
     }
 
     // Methods

@@ -2,7 +2,6 @@ package com.tech_blog.prod.infrastructure.controllers;
 
 import com.tech_blog.prod.application.dto.requests.auth.LoginRequest;
 import com.tech_blog.prod.application.dto.responses.auth.LoginResponse;
-import com.tech_blog.prod.application.usecases.ports.IAuthUsePort;
 import com.tech_blog.prod.infrastructure.security.user.AuthUserDetails;
 import com.tech_blog.prod.infrastructure.security.util.JwtService;
 import jakarta.validation.Valid;
@@ -14,10 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -53,38 +50,11 @@ public class AuthController {
         long longCurrentTime = System.currentTimeMillis();
 
         String accessToken = jwtService.generateToken(username, roles, longCurrentTime);
-        String refreshToken = jwtService.generateRefreshToken(username, longCurrentTime);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse("Bearer", accessToken, refreshToken));
+        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse("Bearer", accessToken));
     }
 
-    @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
-        String refreshToken = refreshRequest.getRefreshToken();
 
-        try {
-            Claims claims = jwtDecoder.parseToken(refreshToken);
-
-            // Validar que sea un refresh token
-            if (!"refresh".equals(claims.get("type"))) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            String username = claims.getSubject();
-            long now = System.currentTimeMillis();
-
-            // Opcional: si incluiste roles en el refresh token
-            List<String> roles = claims.get("roles", List.class);
-
-            String newAccessToken = jwtService.generateToken(username, roles, now);
-            String newRefreshToken = jwtService.generateRefreshToken(username, now); // rotación opcional
-
-            return ResponseEntity.ok(new LoginResponse("Bearer", newAccessToken, newRefreshToken));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
 
 
 

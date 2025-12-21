@@ -10,11 +10,10 @@ spring:
     show-sql: false
     hibernate:
       ddl-auto: update
-  jwt:
-    secret: "1f3c7218ea76d594351145add5dfc462030bc0431edf94a278b8f70a671bf7c6"
-    expiration: 900000 # 15 minutos (1000 * 60 * 15)
-    refresh_expiration: 604800000 # 7 días (1000 * 60 * 60 * 24 * 7)
-    remember_expiration: 2592000000 # 30 días (1000 * 60 * 60 * 24 * 30)
+
+jwt:
+  secret: "MWYzYzcyMThlYTc2ZDU5NDM1MTE0NWFkZDVkZmM0NjIwMzBiYzA0MzFlZGY5NGEyNzhiOGY3MGE2NzFiZjdjNg==" #1f3c7218ea76d594351145add5dfc462030bc0431edf94a278b8f70a671bf7c6
+  expiration: 900000 # 15 minutos (1000 * 60 * 15)
 
 server:
   port: ${PORT:8080}

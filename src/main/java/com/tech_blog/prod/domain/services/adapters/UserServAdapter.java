@@ -1,8 +1,10 @@
 package com.tech_blog.prod.domain.services.adapters;
 
+import com.tech_blog.prod.application.constants.Role;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
 import com.tech_blog.prod.application.dto.responses.users.UserResponse;
+import com.tech_blog.prod.domain.services.ports.IAuthServPort;
 import com.tech_blog.prod.domain.services.ports.IUserServPort;
 import com.tech_blog.prod.infrastructure.database.entities.UserEntity;
 import com.tech_blog.prod.infrastructure.database.repositories.IUserRepository;
@@ -13,9 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserServAdapter implements IUserServPort {
@@ -23,10 +27,12 @@ public class UserServAdapter implements IUserServPort {
     // Inyección de dependencias
     private final IUserRepository iUserRepository;
     private final BCryptPasswordEncoder encoder;
+    private final IAuthServPort iAuthServPort;
 
     // Constructor
-    public UserServAdapter(IUserRepository iUserRepository, BCryptPasswordEncoder encoder) {
+    public UserServAdapter(IUserRepository iUserRepository, IAuthServPort iAuthServPort,BCryptPasswordEncoder encoder) {
         this.iUserRepository = iUserRepository;
+        this.iAuthServPort = iAuthServPort;
         this.encoder = encoder;
     }
 
@@ -37,31 +43,56 @@ public class UserServAdapter implements IUserServPort {
     }
 
     @Override
-    public UserResponse getCurrentUser(Authentication authentication) {
-        UserEntity actored = actor(authentication);
-        return auxiliaryUserEntityToResponse(actored);
+    public UserResponse getCurrentUser() {
+        return auxiliaryUserEntityToResponse(iAuthServPort.getCurrentUserEntity());
     }
 
     @Override
     public List<UserResponse> listUsers(Authentication authentication) {
-        UserEntity a = actor(authentication);
 
-        if (!isAdmin(a)) {
-            throw new IllegalArgumentException("Access denied: only ADMIN+ can list users");
-        }
+        Role role = iAuthServPort.getCurrentUserStrongestRole();
+        UserEntity me = iAuthServPort.getCurrentUserEntity();
 
-        return iUserRepository.findAll().stream().map(this::auxiliaryUserEntityToResponse).toList();
+        List<UserEntity> users = switch (role) {
+            case SUPERADMIN -> iUserRepository.findAll();
+            case ADMIN      -> iUserRepository.findByIsUserAndIsAdminAndIsSuperadmin(true, false, false);
+            case USER       -> List.of(me);
+        };
+
+        return users.stream()
+                .map(this::auxiliaryUserEntityToResponse)
+                .toList();
     }
 
     @Override
-    public UserResponse getUserById(Long id, Authentication authentication) {
-        UserEntity a = actor(authentication);
-        if (!isAdmin(a)) throw new IllegalArgumentException("Access denied: only ADMIN+");
+    public UserResponse getUserById(Long id) {
 
-        UserEntity target = getUserEntityById(id);
-        assertCanManageTarget(a, target);
+        Role role = iAuthServPort.getCurrentUserStrongestRole();
 
-        return auxiliaryUserEntityToResponse(target);
+        try {
+            UserEntity user = switch (role) {
+
+                case SUPERADMIN ->
+                    iUserRepository.findById(id).orElseThrow();
+
+                case ADMIN ->
+                    iUserRepository
+                        .findByIdAndIsUserAndIsAdminAndIsSuperadmin(id, true, false, false)
+                        .orElseThrow();
+
+                case USER ->
+                    throw new ResponseStatusException(
+                        HttpStatus.FORBIDDEN, "Forbidden"
+                    );
+            };
+
+            return auxiliaryUserEntityToResponse(user);
+
+        } catch (NoSuchElementException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Forbidden"
+            );
+        }
     }
 
     @Override
@@ -161,13 +192,6 @@ public class UserServAdapter implements IUserServPort {
 
 
     // Helpers
-    private UserEntity actor(Authentication authentication) {
-        if (authentication == null || !(authentication.getPrincipal() instanceof AuthUserDetails principal)) {
-            throw new IllegalArgumentException("Unauthenticated");
-        }
-        return principal.getUserEntity();
-    }
-
     private boolean isSuper(UserEntity a) {
         return Boolean.TRUE.equals(a.getIsSuperadmin());
     }

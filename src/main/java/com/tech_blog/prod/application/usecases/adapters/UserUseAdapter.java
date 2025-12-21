@@ -20,8 +20,8 @@ public class UserUseAdapter implements IUserUsePort {
     }
 
     @Override
-    public UserResponse getCurrentUser(Authentication authentication) {
-        return iUSerServPort.getCurrentUser(authentication);
+    public UserResponse getCurrentUser() {
+        return iUSerServPort.getCurrentUser();
     }
 
     @Override

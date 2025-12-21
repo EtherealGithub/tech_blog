@@ -13,7 +13,7 @@ public interface IUserServPort {
 
     UserEntity getUserEntityById(Long id);
 
-    UserResponse getCurrentUser(Authentication authentication);
+    UserResponse getCurrentUser();
     List<UserResponse> listUsers(Authentication authentication);
     UserResponse getUserById(Long id, Authentication authentication);
     UserResponse createUser(CreateUserRequest createUserRequest, Authentication authentication);

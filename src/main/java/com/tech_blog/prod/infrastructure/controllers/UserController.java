@@ -25,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(Authentication authentication) {
-        return ResponseEntity.ok(iUserUsePort.getCurrentUser(authentication));
+    public ResponseEntity<UserResponse> me() {
+        return ResponseEntity.ok(iUserUsePort.getCurrentUser());
     }
 
     @GetMapping("/list_users")
