@@ -19,7 +19,7 @@ app:
       email: ${BOOTSTRAP_SUPERADMIN_EMAIL:superadmin@local.test}
       password: ${BOOTSTRAP_SUPERADMIN_PASSWORD:superadmin}
   jwt:
-    secret: ${JWT_EXP:MWYzYzcyMThlYTc2ZDU5NDM1MTE0NWFkZDVkZmM0NjIwMzBiYzA0MzFlZGY5NGEyNzhiOGY3MGE2NzFiZjdjNg==}
+    secret: ${JWT_SECRET:MWYzYzcyMThlYTc2ZDU5NDM1MTE0NWFkZDVkZmM0NjIwMzBiYzA0MzFlZGY5NGEyNzhiOGY3MGE2NzFiZjdjNg==}
     expiration: ${JWT_EXP:1800000} # 18 minutos (1000 * 60 * 18)
 
 server:

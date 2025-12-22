@@ -1,6 +1,5 @@
 package com.tech_blog.prod.infrastructure.controllers;
 
-import com.tech_blog.prod.application.dto.requests.auth.RegisterRequest;
 import com.tech_blog.prod.application.dto.requests.users.ChangePasswordRequest;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
@@ -69,9 +68,4 @@ public class UserController {
         return ResponseEntity.noContent().header("X-Message", "User deleted successfully").build();
     }
 
-
-    @PostMapping("/own_register_user")
-    public ResponseEntity<UserResponse> ownRegisterUser(@RequestBody @Valid RegisterRequest registerRequest) {
-        return ResponseEntity.ok(iUserUsePort.ownRegister(registerRequest));
-    }
 }
