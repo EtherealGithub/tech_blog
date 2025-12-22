@@ -37,18 +37,15 @@ public class AuthUserDetails implements UserDetails {
 
         List<GrantedAuthority> auth = new ArrayList<>();
 
-        if (Boolean.TRUE.equals(userEntity.getIsSuperadmin())) {
+        if (Boolean.TRUE.equals(userEntity.getIsUser()))
+            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+        if (Boolean.TRUE.equals(userEntity.getIsAdmin()))
+            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+        if (Boolean.TRUE.equals(userEntity.getIsSuperadmin()))
             auth.add(new SimpleGrantedAuthority("ROLE_SUPERADMIN"));
-            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
-            return auth;
-        }
-        if (Boolean.TRUE.equals(userEntity.getIsAdmin())) {
-            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
-            return auth;
-        }
-        auth.add(new SimpleGrantedAuthority("ROLE_USER"));
+
         return auth;
     }
 

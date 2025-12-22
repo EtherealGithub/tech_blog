@@ -1,15 +1,15 @@
 package com.tech_blog.prod.infrastructure.controllers;
 
+import com.tech_blog.prod.application.dto.requests.auth.RegisterRequest;
 import com.tech_blog.prod.application.dto.requests.users.ChangePasswordRequest;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
+import com.tech_blog.prod.application.dto.requests.users.UpdateUserRoleRequest;
 import com.tech_blog.prod.application.dto.responses.users.UserResponse;
 import com.tech_blog.prod.application.usecases.ports.IUserUsePort;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,54 +30,48 @@ public class UserController {
     }
 
     @GetMapping("/list_users")
-    public ResponseEntity<List<UserResponse>> listUsers(Authentication authentication) {
-        return ResponseEntity.ok(iUserUsePort.listUsers(authentication));
+    public ResponseEntity<List<UserResponse>> listUsers() {
+        return ResponseEntity.ok(iUserUsePort.listUsers());
     }
 
     @GetMapping("/read_user/{id}")
-    public ResponseEntity<UserResponse> getUserById(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-        return ResponseEntity.ok(iUserUsePort.getUserById(id, authentication));
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id ) {
+        return ResponseEntity.ok(iUserUsePort.getUserById(id));
     }
 
     @PostMapping("/create_user")
-    public ResponseEntity<UserResponse> create(
-            @RequestBody @Valid CreateUserRequest createUserRequest,
-            Authentication authentication
-    ) {
-        UserResponse created = iUserUsePort.createUser(createUserRequest, authentication);
+    public ResponseEntity<UserResponse> createUser(@RequestBody @Valid CreateUserRequest createUserRequest) {
+        UserResponse created = iUserUsePort.createUser(createUserRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/update_user/{id}")
-    public ResponseEntity<UserResponse> update(
-            @PathVariable Long id,
-            @RequestBody @Valid UpdateUserRequest updateUserRequest,
-            Authentication authentication
-    ) {
-        return ResponseEntity.ok(iUserUsePort.updateUser(id, updateUserRequest, authentication));
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody @Valid UpdateUserRequest updateUserRequest) {
+        UserResponse updated = iUserUsePort.updateUser(id, updateUserRequest);
+        return ResponseEntity.ok(updated);
     }
 
-    @PatchMapping("/change_password/{id}/")
-    public ResponseEntity<Void> changePassword(
-            @PathVariable Long id,
-            @RequestBody @Valid ChangePasswordRequest changePasswordRequest,
-            Authentication authentication
-    ) {
-        iUserUsePort.changePasswordById(id, changePasswordRequest.newPassword(), authentication);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/change_password/{id}")
+    public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+        iUserUsePort.changePasswordById(id, changePasswordRequest.newPassword());
+        return ResponseEntity.noContent().header("X-Message", "Password updated successfully").build();
+    }
+
+    @PatchMapping("/update_user_role/{id}")
+    public ResponseEntity<UserResponse> updateUserRoleById(@PathVariable Long id, @RequestBody @Valid UpdateUserRoleRequest updateUserRoleRequest) {
+        UserResponse updated = iUserUsePort.updateUserRoleById(id, updateUserRoleRequest);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/delete_user/{id}")
-    public ResponseEntity<Void> delete(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-        iUserUsePort.deleteUserById(id, authentication);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        iUserUsePort.deleteUserById(id);
+        return ResponseEntity.noContent().header("X-Message", "User deleted successfully").build();
     }
 
 
+    @PostMapping("/own_register_user")
+    public ResponseEntity<UserResponse> ownRegisterUser(@RequestBody @Valid RegisterRequest registerRequest) {
+        return ResponseEntity.ok(iUserUsePort.ownRegister(registerRequest));
+    }
 }

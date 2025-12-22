@@ -1,7 +1,9 @@
 package com.tech_blog.prod.application.usecases.adapters;
 
+import com.tech_blog.prod.application.dto.requests.auth.RegisterRequest;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
+import com.tech_blog.prod.application.dto.requests.users.UpdateUserRoleRequest;
 import com.tech_blog.prod.application.dto.responses.users.UserResponse;
 import com.tech_blog.prod.application.usecases.ports.IUserUsePort;
 import com.tech_blog.prod.domain.services.ports.IUserServPort;
@@ -25,32 +27,44 @@ public class UserUseAdapter implements IUserUsePort {
     }
 
     @Override
-    public List<UserResponse> listUsers(Authentication authentication) {
-        return iUSerServPort.listUsers(authentication);
+    public List<UserResponse> listUsers() {
+        return iUSerServPort.listUsers();
     }
 
     @Override
-    public UserResponse getUserById(Long id, Authentication authentication) {
-        return iUSerServPort.getUserById(id, authentication);
+    public UserResponse getUserById(Long id) {
+        return iUSerServPort.getUserById(id);
     }
 
     @Override
-    public UserResponse createUser(CreateUserRequest createUserRequest, Authentication authentication) {
-        return iUSerServPort.createUser(createUserRequest, authentication);
+    public UserResponse createUser(CreateUserRequest createUserRequest) {
+        return iUSerServPort.createUser(createUserRequest);
     }
 
     @Override
-    public UserResponse updateUser(Long id, UpdateUserRequest updateUserRequest, Authentication authentication) {
-        return iUSerServPort.updateUser(id, updateUserRequest, authentication);
+    public UserResponse updateUser(Long id, UpdateUserRequest updateUserRequest) {
+        return iUSerServPort.updateUser(id, updateUserRequest);
     }
 
     @Override
-    public void changePasswordById(Long id, String newPassword, Authentication authentication) {
-        iUSerServPort.changePasswordById(id, newPassword, authentication);
+    public void changePasswordById(Long id, String newPassword) {
+        iUSerServPort.changePasswordById(id, newPassword);
     }
 
     @Override
-    public void deleteUserById(Long id, Authentication authentication) {
-        iUSerServPort.deleteUserById(id, authentication);
+    public UserResponse updateUserRoleById(Long id, UpdateUserRoleRequest updateUserRoleRequest) {
+        return iUSerServPort.updateUserRoleById(id, updateUserRoleRequest);
     }
+
+    @Override
+    public void deleteUserById(Long id) {
+        iUSerServPort.deleteUserById(id);
+    }
+
+    @Override
+    public UserResponse ownRegister(RegisterRequest registerRequest) {
+        return iUSerServPort.ownRegister(registerRequest);
+    }
+
+
 }

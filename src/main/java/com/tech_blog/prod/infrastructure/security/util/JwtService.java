@@ -31,7 +31,6 @@ public class JwtService {
                 .issuedAt(new Date(longCurrentTime))
                 .expiration(new Date(longCurrentTime + jwtConfig.getExpirationMs()))
                 .claim("roles", roles)
-                .claim("type", "access")
                 .signWith(jwtConfig.getSignInKey())
                 .compact();
     }

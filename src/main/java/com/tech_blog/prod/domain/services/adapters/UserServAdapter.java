@@ -1,6 +1,7 @@
 package com.tech_blog.prod.domain.services.adapters;
 
 import com.tech_blog.prod.application.constants.Role;
+import com.tech_blog.prod.application.dto.requests.auth.RegisterRequest;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRoleRequest;
@@ -163,6 +164,36 @@ public class UserServAdapter implements IUserServPort {
         UserEntity user = resolveTargetUser(id);
         iUserRepository.delete(user);
     }
+
+
+    @Override
+    public UserResponse ownRegister(RegisterRequest registerRequest) {
+
+        String username = registerRequest.username().trim();
+        String email = registerRequest.email().trim();
+
+        if (iUserRepository.existsByUsernameIgnoreCase(username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+        }
+        if (iUserRepository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
+        }
+
+        UserEntity user = new UserEntity();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(encoder.encode(registerRequest.password()));
+
+        user.setIsUser(true);
+        user.setIsAdmin(false);
+        user.setIsSuperadmin(false);
+
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(null);
+
+        return auxiliaryUserEntityToResponse(iUserRepository.save(user));
+    }
+
 
 
 

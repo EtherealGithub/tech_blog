@@ -1,5 +1,6 @@
 package com.tech_blog.prod.domain.services.ports;
 
+import com.tech_blog.prod.application.dto.requests.auth.RegisterRequest;
 import com.tech_blog.prod.application.dto.requests.users.CreateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRequest;
 import com.tech_blog.prod.application.dto.requests.users.UpdateUserRoleRequest;
@@ -22,4 +23,6 @@ public interface IUserServPort {
     void changePasswordById(Long id, String newPassword);
     UserResponse updateUserRoleById(Long id, UpdateUserRoleRequest updateUserRoleRequest);
     void deleteUserById(Long id);
+
+    UserResponse ownRegister(RegisterRequest registerRequest);
 }

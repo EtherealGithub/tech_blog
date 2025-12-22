@@ -2,6 +2,7 @@ package com.tech_blog.prod.infrastructure.controllers;
 
 import com.tech_blog.prod.application.dto.requests.auth.LoginRequest;
 import com.tech_blog.prod.application.dto.responses.auth.LoginResponse;
+import com.tech_blog.prod.application.dto.responses.users.UserResponse;
 import com.tech_blog.prod.infrastructure.security.user.AuthUserDetails;
 import com.tech_blog.prod.infrastructure.security.util.JwtService;
 import jakarta.validation.Valid;
