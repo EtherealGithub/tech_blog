@@ -1,0 +1,43 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TechBlog.Api.Extensions;
+using TechBlog.Application.DTOs.Comments;
+using TechBlog.Application.Ports;
+
+namespace TechBlog.Api.Controllers;
+
+[ApiController]
+[Route("api/comment")]
+public class CommentController : ControllerBase
+{
+    private readonly ICommentUseCase _commentUseCase;
+
+    public CommentController(ICommentUseCase commentUseCase)
+    {
+        _commentUseCase = commentUseCase;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("post/{postId:guid}")]
+    public async Task<IActionResult> List(Guid postId, CancellationToken cancellationToken)
+    {
+        var comments = await _commentUseCase.ListByPostAsync(postId, cancellationToken);
+        return Ok(comments);
+    }
+
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CommentRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _commentUseCase.CreateAsync(request, User.GetUserId(), User.GetUserRole(), cancellationToken);
+        return Ok(response);
+    }
+
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        await _commentUseCase.DeleteAsync(id, User.GetUserRole(), cancellationToken);
+        return NoContent();
+    }
+}
