@@ -9,6 +9,7 @@ namespace TechBlog.Api.Controllers;
 [ApiController]
 [Route("api/user")]
 [Authorize]
+[Tags("user-controller")]
 public class UserController : ControllerBase
 {
     private readonly IUserUseCase _userUseCase;

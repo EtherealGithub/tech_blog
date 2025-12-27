@@ -8,6 +8,7 @@ namespace TechBlog.Api.Controllers;
 
 [ApiController]
 [Route("api/comment")]
+[Tags("comment-controller")]
 public class CommentController : ControllerBase
 {
     private readonly ICommentUseCase _commentUseCase;
@@ -15,14 +16,6 @@ public class CommentController : ControllerBase
     public CommentController(ICommentUseCase commentUseCase)
     {
         _commentUseCase = commentUseCase;
-    }
-
-    [AllowAnonymous]
-    [HttpGet("post/{postId:guid}")]
-    public async Task<IActionResult> List(Guid postId, CancellationToken cancellationToken)
-    {
-        var comments = await _commentUseCase.ListByPostAsync(postId, cancellationToken);
-        return Ok(comments);
     }
 
     [AllowAnonymous]
@@ -42,7 +35,6 @@ public class CommentController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost]
     [HttpPost("create_comment")]
     public async Task<IActionResult> Create([FromBody] CommentRequest request, CancellationToken cancellationToken)
     {
@@ -51,7 +43,6 @@ public class CommentController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,SuperAdmin")]
-    [HttpDelete("{id:guid}")]
     [HttpDelete("delete_comment/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

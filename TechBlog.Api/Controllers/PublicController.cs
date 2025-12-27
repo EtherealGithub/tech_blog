@@ -8,6 +8,7 @@ namespace TechBlog.Api.Controllers;
 
 [ApiController]
 [Route("api/public")]
+[Tags("public-controller")]
 public class PublicController : ControllerBase
 {
     private readonly IPostUseCase _postUseCase;

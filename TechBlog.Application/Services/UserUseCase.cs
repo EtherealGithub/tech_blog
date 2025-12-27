@@ -27,9 +27,9 @@ public class UserUseCase : IUserUseCase
             Username = request.Username,
             Email = request.Email,
             PasswordHash = request.Password,
-            IsSuperAdmin = request.IsSuperAdmin,
-            IsAdmin = request.IsAdmin,
-            IsUser = request.IsUser
+            IsSuperAdmin = request.Role == RoleType.SuperAdmin || request.IsSuperAdmin,
+            IsAdmin = request.Role == RoleType.Admin || request.IsAdmin,
+            IsUser = request.Role == RoleType.User || request.IsUser
         };
 
         var created = await _userDomainService.RegisterAsync(user, performerRole, cancellationToken);
@@ -42,9 +42,7 @@ public class UserUseCase : IUserUseCase
         var existing = await _userRepository.GetByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("User not found");
         existing.Username = request.Username;
         existing.Email = request.Email;
-        existing.IsSuperAdmin = request.IsSuperAdmin;
-        existing.IsAdmin = request.IsAdmin;
-        existing.IsUser = request.IsUser;
+        // Roles are updated via UpdateRoleAsync
         var updated = await _userDomainService.UpdateAsync(existing, performerRole, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Map(updated);

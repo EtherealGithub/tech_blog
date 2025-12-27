@@ -8,6 +8,7 @@ namespace TechBlog.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[Tags("auth-controller")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthUseCase _authUseCase;

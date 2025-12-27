@@ -8,6 +8,7 @@ namespace TechBlog.Api.Controllers;
 
 [ApiController]
 [Route("api/post")]
+[Tags("post-controller")]
 public class PostController : ControllerBase
 {
     private readonly IPostUseCase _postUseCase;
@@ -18,7 +19,6 @@ public class PostController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet]
     [HttpGet("list_posts")]
     public async Task<IActionResult> List([FromQuery] Guid? categoryId, [FromQuery] string? sort, [FromQuery] int? page, [FromQuery] int? size, CancellationToken cancellationToken)
     {
@@ -27,7 +27,6 @@ public class PostController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:guid}")]
     [HttpGet("read_post/{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
@@ -36,16 +35,14 @@ public class PostController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,SuperAdmin")]
-    [HttpPost]
     [HttpPost("create_post")]
     public async Task<IActionResult> Create([FromBody] PostRequest request, CancellationToken cancellationToken)
     {
         var response = await _postUseCase.CreateAsync(request, User.GetUserId(), User.GetUserRole(), cancellationToken);
-        return CreatedAtAction(nameof(Get), new { id = response.Id }, response);
+        return Ok(response);
     }
 
     [Authorize(Roles = "Admin,SuperAdmin")]
-    [HttpPut("{id:guid}")]
     [HttpPut("update_post/{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] PostRequest request, CancellationToken cancellationToken)
     {
@@ -55,7 +52,6 @@ public class PostController : ControllerBase
     }
 
     [Authorize(Roles = "Admin,SuperAdmin")]
-    [HttpDelete("{id:guid}")]
     [HttpDelete("delete_post/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
