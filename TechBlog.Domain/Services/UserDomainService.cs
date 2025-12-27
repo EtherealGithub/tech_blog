@@ -52,11 +52,10 @@ public class UserDomainService : IUserDomainService
         return user;
     }
 
-    public async Task<User> ValidateCredentialsAsync(string usernameOrEmail, string password, CancellationToken cancellationToken = default)
+    public async Task<User> ValidateCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
     {
-        var normalized = usernameOrEmail.Trim();
-        var user = await _userRepository.GetByUsernameAsync(normalized, cancellationToken) ??
-                   await _userRepository.GetByEmailAsync(normalized, cancellationToken);
+        var normalized = username.Trim();
+        var user = await _userRepository.GetByUsernameAsync(normalized, cancellationToken);
 
         if (user is null || !_passwordHasher.Verify(password, user.PasswordHash))
         {

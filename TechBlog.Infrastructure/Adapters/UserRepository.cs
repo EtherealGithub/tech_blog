@@ -50,12 +50,6 @@ public class UserRepository : IUserRepository
         return entity is null ? null : ToDomain(entity);
     }
 
-    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
-    {
-        var entity = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
-        return entity is null ? null : ToDomain(entity);
-    }
-
     public async Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Users.AsNoTracking().AnyAsync(u => u.Username == username, cancellationToken);

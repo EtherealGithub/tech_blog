@@ -29,7 +29,7 @@ public class AuthUseCase : IAuthUseCase
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userDomainService.ValidateCredentialsAsync(request.UsernameOrEmail, request.Password, cancellationToken);
+        var user = await _userDomainService.ValidateCredentialsAsync(request.Username, request.Password, cancellationToken);
         var expires = DateTime.UtcNow.Add(_tokenLifetime);
         var token = _tokenProvider.GenerateToken(user, expires);
         return new LoginResponse(token, expires, user.Username, user.IsSuperAdmin, user.IsAdmin, user.IsUser);
