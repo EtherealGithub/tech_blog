@@ -27,7 +27,9 @@ public class TechBlogDbContext : DbContext
             entity.Property(e => e.Username).HasMaxLength(80).IsRequired();
             entity.Property(e => e.Email).HasMaxLength(255).IsRequired();
             entity.Property(e => e.PasswordHash).HasMaxLength(512).IsRequired();
-            entity.Property(e => e.Role).IsRequired();
+            entity.Property(e => e.IsSuperAdmin).IsRequired().HasDefaultValue(false);
+            entity.Property(e => e.IsAdmin).IsRequired().HasDefaultValue(false);
+            entity.Property(e => e.IsUser).IsRequired().HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.HasIndex(e => e.Username).IsUnique();
             entity.HasIndex(e => e.Email).IsUnique();

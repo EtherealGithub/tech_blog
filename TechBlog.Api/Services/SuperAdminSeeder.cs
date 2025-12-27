@@ -32,7 +32,9 @@ public class SuperAdminSeeder : IHostedService
             Username = _bootstrapSettings.Superadmin.Username,
             Email = _bootstrapSettings.Superadmin.Email,
             Password = _bootstrapSettings.Superadmin.Password,
-            Role = RoleType.SuperAdmin
+            IsSuperAdmin = true,
+            IsAdmin = false,
+            IsUser = false
         };
 
         await userUseCase.CreateAsync(request, RoleType.SuperAdmin, cancellationToken);

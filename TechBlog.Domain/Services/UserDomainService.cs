@@ -1,3 +1,4 @@
+using System.Linq;
 using TechBlog.Domain.Entities;
 using TechBlog.Domain.Enums;
 using TechBlog.Domain.Exceptions;
@@ -28,7 +29,8 @@ public class UserDomainService : IUserDomainService
         user.Username = user.Username.Trim();
         user.Email = user.Email.Trim();
 
-        await EnsureRoleCanBeManaged(performedBy, user.Role);
+        NormalizeAndValidateRoles(user);
+        await EnsureRoleCanBeManaged(performedBy, user.GetHighestRole());
         await EnsureUserUniqueAsync(user, cancellationToken);
 
         user.Id = user.Id == Guid.Empty ? Guid.NewGuid() : user.Id;
@@ -43,7 +45,8 @@ public class UserDomainService : IUserDomainService
     {
         user.Username = user.Username.Trim();
         user.Email = user.Email.Trim();
-        await EnsureRoleCanBeManaged(performedBy, user.Role);
+        NormalizeAndValidateRoles(user);
+        await EnsureRoleCanBeManaged(performedBy, user.GetHighestRole());
         await EnsureUserUniqueAsync(user, cancellationToken, user.Id);
         await _userRepository.UpdateAsync(user, cancellationToken);
         return user;
@@ -75,6 +78,21 @@ public class UserDomainService : IUserDomainService
         if (emailTaken && existingId != user.Id)
         {
             throw new ValidationException("Email already exists");
+        }
+    }
+
+    private static void NormalizeAndValidateRoles(User user)
+    {
+        var trueCount = new[] { user.IsSuperAdmin, user.IsAdmin, user.IsUser }.Count(flag => flag);
+        if (trueCount == 0)
+        {
+            user.IsUser = true;
+            trueCount = 1;
+        }
+
+        if (trueCount > 1)
+        {
+            throw new ValidationException("User role flags must be mutually exclusive");
         }
     }
 

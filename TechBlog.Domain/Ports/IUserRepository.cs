@@ -1,6 +1,4 @@
 using TechBlog.Domain.Entities;
-using TechBlog.Domain.Enums;
-
 namespace TechBlog.Domain.Ports;
 
 public interface IUserRepository

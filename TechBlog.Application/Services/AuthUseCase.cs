@@ -32,7 +32,7 @@ public class AuthUseCase : IAuthUseCase
         var user = await _userDomainService.ValidateCredentialsAsync(request.UsernameOrEmail, request.Password, cancellationToken);
         var expires = DateTime.UtcNow.Add(_tokenLifetime);
         var token = _tokenProvider.GenerateToken(user, expires);
-        return new LoginResponse(token, expires, user.Username, user.Role);
+        return new LoginResponse(token, expires, user.Username, user.IsSuperAdmin, user.IsAdmin, user.IsUser);
     }
 
     public async Task<UserResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
@@ -42,11 +42,13 @@ public class AuthUseCase : IAuthUseCase
             Username = request.Username,
             Email = request.Email,
             PasswordHash = request.Password,
-            Role = RoleType.User
+            IsSuperAdmin = false,
+            IsAdmin = false,
+            IsUser = true
         };
 
         var created = await _userDomainService.RegisterAsync(user, RoleType.User, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return new UserResponse(created.Id, created.Username, created.Email, created.Role, created.CreatedAt);
+        return new UserResponse(created.Id, created.Username, created.Email, created.IsSuperAdmin, created.IsAdmin, created.IsUser, created.CreatedAt);
     }
 }

@@ -1,5 +1,3 @@
-using TechBlog.Domain.Enums;
-
 namespace TechBlog.Infrastructure.Entities;
 
 public class UserEntity
@@ -8,7 +6,9 @@ public class UserEntity
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public RoleType Role { get; set; } = RoleType.User;
+    public bool IsSuperAdmin { get; set; }
+    public bool IsAdmin { get; set; }
+    public bool IsUser { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<PostEntity> Posts { get; set; } = new List<PostEntity>();

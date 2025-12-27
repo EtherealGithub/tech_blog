@@ -8,6 +8,15 @@ public class User
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    public RoleType Role { get; set; } = RoleType.User;
+    public bool IsSuperAdmin { get; set; }
+    public bool IsAdmin { get; set; }
+    public bool IsUser { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public RoleType GetHighestRole()
+    {
+        if (IsSuperAdmin) return RoleType.SuperAdmin;
+        if (IsAdmin) return RoleType.Admin;
+        return RoleType.User;
+    }
 }

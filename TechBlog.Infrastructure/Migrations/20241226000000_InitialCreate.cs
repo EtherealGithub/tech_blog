@@ -23,7 +23,9 @@ namespace TechBlog.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     PasswordHash = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Role = table.Column<int>(type: "int", nullable: false),
+                    IsSuperAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
+                    IsAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
+                    IsUser = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>

@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using TechBlog.Domain.Entities;
-using TechBlog.Domain.Enums;
 using TechBlog.Domain.Ports;
 using TechBlog.Infrastructure.Entities;
 using TechBlog.Infrastructure.Persistence;
@@ -32,7 +31,9 @@ public class UserRepository : IUserRepository
 
         entity.Username = user.Username;
         entity.Email = user.Email;
-        entity.Role = user.Role;
+        entity.IsSuperAdmin = user.IsSuperAdmin;
+        entity.IsAdmin = user.IsAdmin;
+        entity.IsUser = user.IsUser;
         entity.PasswordHash = user.PasswordHash;
         _dbContext.Users.Update(entity);
     }
@@ -77,7 +78,9 @@ public class UserRepository : IUserRepository
         Username = entity.Username,
         Email = entity.Email,
         PasswordHash = entity.PasswordHash,
-        Role = entity.Role,
+        IsSuperAdmin = entity.IsSuperAdmin,
+        IsAdmin = entity.IsAdmin,
+        IsUser = entity.IsUser,
         CreatedAt = entity.CreatedAt
     };
 
@@ -87,7 +90,9 @@ public class UserRepository : IUserRepository
         Username = user.Username,
         Email = user.Email,
         PasswordHash = user.PasswordHash,
-        Role = user.Role,
+        IsSuperAdmin = user.IsSuperAdmin,
+        IsAdmin = user.IsAdmin,
+        IsUser = user.IsUser,
         CreatedAt = user.CreatedAt
     };
 }
