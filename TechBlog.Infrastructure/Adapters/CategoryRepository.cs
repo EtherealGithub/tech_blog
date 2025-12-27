@@ -29,7 +29,6 @@ public class CategoryRepository : ICategoryRepository
         }
 
         entity.Name = category.Name;
-        entity.Slug = category.Slug;
         entity.Description = category.Description;
         _dbContext.Categories.Update(entity);
     }
@@ -49,20 +48,9 @@ public class CategoryRepository : ICategoryRepository
         return entity is null ? null : ToDomain(entity);
     }
 
-    public async Task<Category?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
-    {
-        var entity = await _dbContext.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == slug, cancellationToken);
-        return entity is null ? null : ToDomain(entity);
-    }
-
     public async Task<bool> NameExistsAsync(string name, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Categories.AsNoTracking().AnyAsync(c => c.Name == name, cancellationToken);
-    }
-
-    public async Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.Categories.AsNoTracking().AnyAsync(c => c.Slug == slug, cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<Category>> ListAsync(CancellationToken cancellationToken = default)
@@ -75,7 +63,6 @@ public class CategoryRepository : ICategoryRepository
     {
         Id = entity.Id,
         Name = entity.Name,
-        Slug = entity.Slug,
         Description = entity.Description
     };
 
@@ -83,7 +70,6 @@ public class CategoryRepository : ICategoryRepository
     {
         Id = category.Id,
         Name = category.Name,
-        Slug = category.Slug,
         Description = category.Description
     };
 }

@@ -24,11 +24,10 @@ public class CategoryDomainService : ICategoryDomainService
     public async Task<Category> CreateAsync(Category category, RoleType performedBy, CancellationToken cancellationToken = default)
     {
         EnsureAdmin(performedBy);
-        await EnsureUniqueAsync(category, cancellationToken);
         category.Id = Guid.NewGuid();
         category.Name = category.Name.Trim();
-        category.Slug = category.Slug.Trim();
         category.Description = category.Description.Trim();
+        await EnsureUniqueAsync(category, cancellationToken);
         await _categoryRepository.AddAsync(category, cancellationToken);
         return category;
     }
@@ -36,10 +35,9 @@ public class CategoryDomainService : ICategoryDomainService
     public async Task<Category> UpdateAsync(Category category, RoleType performedBy, CancellationToken cancellationToken = default)
     {
         EnsureAdmin(performedBy);
-        await EnsureUniqueAsync(category, cancellationToken, category.Id);
         category.Name = category.Name.Trim();
-        category.Slug = category.Slug.Trim();
         category.Description = category.Description.Trim();
+        await EnsureUniqueAsync(category, cancellationToken, category.Id);
         await _categoryRepository.UpdateAsync(category, cancellationToken);
         return category;
     }
@@ -57,12 +55,6 @@ public class CategoryDomainService : ICategoryDomainService
         if (nameExists && currentId != category.Id)
         {
             throw new ValidationException("Category name already exists");
-        }
-
-        var slugExists = await _categoryRepository.SlugExistsAsync(category.Slug, cancellationToken);
-        if (slugExists && currentId != category.Id)
-        {
-            throw new ValidationException("Category slug already exists");
         }
     }
 

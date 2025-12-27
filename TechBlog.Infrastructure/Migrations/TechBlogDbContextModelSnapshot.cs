@@ -39,18 +39,9 @@ namespace TechBlog.Infrastructure.Migrations
                         .HasColumnType("varchar(120)")
                         .HasAnnotation("MySql:CharSet", "utf8mb4");
 
-                    b.Property<string>("Slug")
-                        .IsRequired()
-                        .HasMaxLength(160)
-                        .HasColumnType("varchar(160)")
-                        .HasAnnotation("MySql:CharSet", "utf8mb4");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("Slug")
                         .IsUnique();
 
                     b.ToTable("categories");
@@ -115,7 +106,7 @@ namespace TechBlog.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<string>("Slug")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
@@ -137,7 +128,7 @@ namespace TechBlog.Infrastructure.Migrations
 
                     b.HasIndex("Featured");
 
-                    b.HasIndex("Slug")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("posts");

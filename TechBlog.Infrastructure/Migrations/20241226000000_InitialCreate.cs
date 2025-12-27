@@ -39,8 +39,6 @@ namespace TechBlog.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false),
                     Name = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Slug = table.Column<string>(type: "varchar(160)", maxLength: 160, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "varchar(512)", maxLength: 512, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
@@ -57,7 +55,7 @@ namespace TechBlog.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "char(36)", nullable: false),
                     Title = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Slug = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                    Name = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Content = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -120,12 +118,6 @@ namespace TechBlog.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_categories_Slug",
-                table: "categories",
-                column: "Slug",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_comments_AuthorId",
                 table: "comments",
                 column: "AuthorId");
@@ -156,9 +148,9 @@ namespace TechBlog.Infrastructure.Migrations
                 column: "Featured");
 
             migrationBuilder.CreateIndex(
-                name: "IX_posts_Slug",
+                name: "IX_posts_Name",
                 table: "posts",
-                column: "Slug",
+                column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(

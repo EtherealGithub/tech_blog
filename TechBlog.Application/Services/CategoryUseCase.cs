@@ -25,7 +25,6 @@ public class CategoryUseCase : ICategoryUseCase
         var category = new Category
         {
             Name = request.Name,
-            Slug = request.Slug,
             Description = request.Description
         };
 
@@ -43,7 +42,6 @@ public class CategoryUseCase : ICategoryUseCase
 
         var existing = await _categoryRepository.GetByIdAsync(request.Id.Value, cancellationToken) ?? throw new KeyNotFoundException("Category not found");
         existing.Name = request.Name;
-        existing.Slug = request.Slug;
         existing.Description = request.Description;
 
         var updated = await _categoryDomainService.UpdateAsync(existing, performerRole, cancellationToken);
@@ -69,5 +67,5 @@ public class CategoryUseCase : ICategoryUseCase
         return categories.Select(Map).ToList();
     }
 
-    private static CategoryResponse Map(Category category) => new(category.Id, category.Name, category.Slug, category.Description);
+    private static CategoryResponse Map(Category category) => new(category.Id, category.Name, category.Description);
 }

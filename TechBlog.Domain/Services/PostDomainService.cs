@@ -29,14 +29,14 @@ public class PostDomainService : IPostDomainService
     {
         await EnsureAuthorization(performedBy);
         await EnsureReferences(post, cancellationToken);
-        await EnsureSlugUnique(post, cancellationToken);
 
         post.Id = Guid.NewGuid();
         post.Title = post.Title.Trim();
-        post.Slug = post.Slug.Trim();
+        post.Name = post.Name.Trim();
         post.Content = post.Content.Trim();
         post.CreatedAt = DateTime.UtcNow;
 
+        await EnsureNameUnique(post, cancellationToken);
         await _postRepository.AddAsync(post, cancellationToken);
         return post;
     }
@@ -45,12 +45,12 @@ public class PostDomainService : IPostDomainService
     {
         await EnsureAuthorization(performedBy);
         await EnsureReferences(post, cancellationToken);
-        await EnsureSlugUnique(post, cancellationToken, post.Id);
 
         post.Title = post.Title.Trim();
-        post.Slug = post.Slug.Trim();
+        post.Name = post.Name.Trim();
         post.Content = post.Content.Trim();
 
+        await EnsureNameUnique(post, cancellationToken, post.Id);
         await _postRepository.UpdateAsync(post, cancellationToken);
         return post;
     }
@@ -62,12 +62,12 @@ public class PostDomainService : IPostDomainService
         await _postRepository.RemoveAsync(existing, cancellationToken);
     }
 
-    private async Task EnsureSlugUnique(Post post, CancellationToken cancellationToken, Guid? currentId = null)
+    private async Task EnsureNameUnique(Post post, CancellationToken cancellationToken, Guid? currentId = null)
     {
-        var existing = await _postRepository.GetBySlugAsync(post.Slug, cancellationToken);
+        var existing = await _postRepository.GetByNameAsync(post.Name, cancellationToken);
         if (existing is not null && existing.Id != currentId)
         {
-            throw new ValidationException("Slug already exists");
+            throw new ValidationException("Post name already exists");
         }
     }
 

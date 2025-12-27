@@ -38,10 +38,8 @@ public class TechBlogDbContext : DbContext
             entity.ToTable("categories");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).HasMaxLength(120).IsRequired();
-            entity.Property(e => e.Slug).HasMaxLength(160).IsRequired();
             entity.Property(e => e.Description).HasMaxLength(512);
             entity.HasIndex(e => e.Name).IsUnique();
-            entity.HasIndex(e => e.Slug).IsUnique();
         });
 
         modelBuilder.Entity<PostEntity>(entity =>
@@ -49,13 +47,13 @@ public class TechBlogDbContext : DbContext
             entity.ToTable("posts");
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
-            entity.Property(e => e.Slug).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Name).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Content).HasColumnType("longtext");
             entity.Property(e => e.Featured).HasDefaultValue(false);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.HasOne(e => e.Category).WithMany(c => c.Posts).HasForeignKey(e => e.CategoryId);
             entity.HasOne(e => e.Author).WithMany(u => u.Posts).HasForeignKey(e => e.AuthorId);
-            entity.HasIndex(e => e.Slug).IsUnique();
+            entity.HasIndex(e => e.Name).IsUnique();
             entity.HasIndex(e => e.CreatedAt);
             entity.HasIndex(e => e.Featured);
         });

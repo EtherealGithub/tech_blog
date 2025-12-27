@@ -25,7 +25,7 @@ public class PostUseCase : IPostUseCase
         var post = new Post
         {
             Title = request.Title,
-            Slug = request.Slug,
+            Name = request.Name,
             Content = request.Content,
             CategoryId = request.CategoryId,
             AuthorId = authorId,
@@ -46,7 +46,7 @@ public class PostUseCase : IPostUseCase
 
         var existing = await _postRepository.GetByIdAsync(request.Id.Value, cancellationToken) ?? throw new KeyNotFoundException("Post not found");
         existing.Title = request.Title;
-        existing.Slug = request.Slug;
+        existing.Name = request.Name;
         existing.Content = request.Content;
         existing.CategoryId = request.CategoryId;
         existing.Featured = request.Featured;
@@ -74,5 +74,5 @@ public class PostUseCase : IPostUseCase
         return posts.Select(Map).ToList();
     }
 
-    private static PostResponse Map(Post post) => new(post.Id, post.Title, post.Slug, post.Content, post.CategoryId, post.AuthorId, post.Featured, post.CreatedAt);
+    private static PostResponse Map(Post post) => new(post.Id, post.Title, post.Name, post.Content, post.CategoryId, post.AuthorId, post.Featured, post.CreatedAt);
 }

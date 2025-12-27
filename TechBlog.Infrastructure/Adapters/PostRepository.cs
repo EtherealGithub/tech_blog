@@ -30,7 +30,7 @@ public class PostRepository : IPostRepository
         }
 
         entity.Title = post.Title;
-        entity.Slug = post.Slug;
+        entity.Name = post.Name;
         entity.Content = post.Content;
         entity.CategoryId = post.CategoryId;
         entity.Featured = post.Featured;
@@ -52,9 +52,9 @@ public class PostRepository : IPostRepository
         return entity is null ? null : ToDomain(entity);
     }
 
-    public async Task<Post?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default)
+    public async Task<Post?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
-        var entity = await _dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Slug == slug, cancellationToken);
+        var entity = await _dbContext.Posts.AsNoTracking().FirstOrDefaultAsync(p => p.Name == name, cancellationToken);
         return entity is null ? null : ToDomain(entity);
     }
 
@@ -68,7 +68,7 @@ public class PostRepository : IPostRepository
     {
         Id = entity.Id,
         Title = entity.Title,
-        Slug = entity.Slug,
+        Name = entity.Name,
         Content = entity.Content,
         CategoryId = entity.CategoryId,
         AuthorId = entity.AuthorId,
@@ -80,7 +80,7 @@ public class PostRepository : IPostRepository
     {
         Id = post.Id,
         Title = post.Title,
-        Slug = post.Slug,
+        Name = post.Name,
         Content = post.Content,
         CategoryId = post.CategoryId,
         AuthorId = post.AuthorId,
