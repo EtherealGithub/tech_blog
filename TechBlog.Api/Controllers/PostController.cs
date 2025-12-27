@@ -19,7 +19,8 @@ public class PostController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> List(CancellationToken cancellationToken)
+    [HttpGet("list_posts")]
+    public async Task<IActionResult> List([FromQuery] Guid? categoryId, [FromQuery] string? sort, [FromQuery] int? page, [FromQuery] int? size, CancellationToken cancellationToken)
     {
         var posts = await _postUseCase.ListAsync(cancellationToken);
         return Ok(posts);
@@ -27,6 +28,7 @@ public class PostController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
+    [HttpGet("read_post/{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var post = await _postUseCase.GetByIdAsync(id, cancellationToken);
@@ -35,6 +37,7 @@ public class PostController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
+    [HttpPost("create_post")]
     public async Task<IActionResult> Create([FromBody] PostRequest request, CancellationToken cancellationToken)
     {
         var response = await _postUseCase.CreateAsync(request, User.GetUserId(), User.GetUserRole(), cancellationToken);
@@ -43,6 +46,7 @@ public class PostController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPut("{id:guid}")]
+    [HttpPut("update_post/{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] PostRequest request, CancellationToken cancellationToken)
     {
         request.Id = id;
@@ -52,6 +56,7 @@ public class PostController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpDelete("{id:guid}")]
+    [HttpDelete("delete_post/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         await _postUseCase.DeleteAsync(id, User.GetUserRole(), cancellationToken);

@@ -19,6 +19,7 @@ public class CategoryController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet]
+    [HttpGet("list_categories")]
     public async Task<IActionResult> List(CancellationToken cancellationToken)
     {
         var categories = await _categoryUseCase.ListAsync(cancellationToken);
@@ -27,6 +28,7 @@ public class CategoryController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
+    [HttpGet("read_category/{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var category = await _categoryUseCase.GetByIdAsync(id, cancellationToken);
@@ -35,6 +37,7 @@ public class CategoryController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPost]
+    [HttpPost("create_category")]
     public async Task<IActionResult> Create([FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
         var response = await _categoryUseCase.CreateAsync(request, User.GetUserRole(), cancellationToken);
@@ -43,6 +46,7 @@ public class CategoryController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpPut("{id:guid}")]
+    [HttpPut("update_category/{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
         request.Id = id;
@@ -52,6 +56,7 @@ public class CategoryController : ControllerBase
 
     [Authorize(Roles = "Admin,SuperAdmin")]
     [HttpDelete("{id:guid}")]
+    [HttpDelete("delete_category/{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         await _categoryUseCase.DeleteAsync(id, User.GetUserRole(), cancellationToken);

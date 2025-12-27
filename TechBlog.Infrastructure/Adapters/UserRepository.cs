@@ -66,6 +66,15 @@ public class UserRepository : IUserRepository
         return items.Select(ToDomain).ToList();
     }
 
+    public async Task RemoveAsync(User user, CancellationToken cancellationToken = default)
+    {
+        var entity = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id, cancellationToken);
+        if (entity is not null)
+        {
+            _dbContext.Users.Remove(entity);
+        }
+    }
+
     private static User ToDomain(UserEntity entity) => new()
     {
         Id = entity.Id,

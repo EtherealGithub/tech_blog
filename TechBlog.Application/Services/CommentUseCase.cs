@@ -46,5 +46,11 @@ public class CommentUseCase : ICommentUseCase
         return comments.Select(Map).ToList();
     }
 
+    public async Task<CommentResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var comment = await _commentRepository.GetByIdAsync(id, cancellationToken);
+        return comment is null ? null : Map(comment);
+    }
+
     private static CommentResponse Map(Comment comment) => new(comment.Id, comment.PostId, comment.AuthorId, comment.Content, comment.CreatedAt);
 }
