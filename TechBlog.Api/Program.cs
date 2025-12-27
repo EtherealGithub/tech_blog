@@ -49,6 +49,7 @@ builder.Services.AddScoped<IAuthUseCase>(sp =>
     var jwtSettings = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<JwtSettings>>().Value;
     return new AuthUseCase(
         sp.GetRequiredService<IUserDomainService>(),
+        sp.GetRequiredService<IUnitOfWork>(),
         sp.GetRequiredService<ITokenProvider>(),
         TimeSpan.FromMinutes(jwtSettings.ExpirationMinutes));
 });

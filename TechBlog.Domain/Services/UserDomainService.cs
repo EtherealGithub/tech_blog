@@ -80,6 +80,11 @@ public class UserDomainService : IUserDomainService
 
     private Task EnsureRoleCanBeManaged(RoleType actorRole, RoleType targetRole)
     {
+        if (actorRole == RoleType.User && targetRole == RoleType.User)
+        {
+            return Task.CompletedTask;
+        }
+
         if (actorRole == RoleType.SuperAdmin)
         {
             return Task.CompletedTask;
